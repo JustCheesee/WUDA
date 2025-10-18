@@ -58,10 +58,10 @@ jobs:
               python-version: '3.11' 
 
           - name: Install backend dependencies
-            run: pip install -r ./back-end/requirements.txt
+            run: pip install -r ./back-end/requirements_test.txt
         
           - name: Install frontend dependencies
-            run: pip install -r ./front-end/requirements.txt
+            run: pip install -r ./front-end/requirements_test.txt
           
           - name: Run backend tests
             run: python ./back-end/test_app.py
