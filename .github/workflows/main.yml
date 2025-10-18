@@ -43,3 +43,28 @@ jobs:
         
         - name: Run Pylint
           run: pylint ./back-end ./front-end
+
+
+  tests:
+      name: Run Custom Tests
+      runs-on: ubuntu-latest
+      steps:
+          - name: Checkout code
+            uses: actions/checkout@v5
+          
+          - name: Set up Python
+            uses: actions/setup-python@v5
+            with:
+              python-version: '3.11' 
+
+          - name: Install backend dependencies
+            run: pip install -r ./back-end/requirements.txt
+        
+          - name: Install frontend dependencies
+            run: pip install -r ./front-end/requirements.txt
+          
+          - name: Run backend tests
+            run: python ./back-end/test_app.py
+           
+          - name: Run frontend tests
+            run: python ./front-end/test_app.py
