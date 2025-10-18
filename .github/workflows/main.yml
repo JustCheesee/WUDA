@@ -66,9 +66,22 @@ jobs:
             working-directory: ./front-end
           
           - name: Run backend tests
+            env:
+              POSTGRES_DB: "testDB"
+              POSTGRES_USER: "testUSER"
+              POSTGRES_PASSWORD: "testPASSWD"
+              POSTGRES_HOST: "testHOST"
+              PORT: "1111"
+              JWT_KEY: "testKEY"
+              APP_PORT: "2222"
             run: pytest
             working-directory: ./back-end
            
           - name: Run frontend tests
+            env:
+              BACKEND_HOSTNAME: "testHOST"
+              BACKEND_PORT: "1111"
+              SECRET_KEY: "testKEY"
+              SERVER_PORT: "2222"
             run: pytest 
             working-directory: ./front-end
