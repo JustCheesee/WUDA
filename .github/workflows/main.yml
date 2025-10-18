@@ -1,0 +1,87 @@
+name: CI/CD Pipeline
+
+on: 
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:  
+
+jobs:
+  source-code-scan:
+      name: Code Vulnerability Scan
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v5
+        
+        - name: Set up Python
+          uses: actions/setup-python@v5
+          with:
+            python-version: '3.11'
+
+        - name: Install Bandit
+          run: pip install bandit
+
+        # -r  : recursive
+        # -ll : report only medium-level issues or higher
+        - name: Run Bandit
+          run: bandit -r -ll ./back-end ./front-end
+
+  linting:
+      name: Lint Code
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v5
+        
+        - name: Set up Python
+          uses: actions/setup-python@v5
+          with:
+            python-version: '3.11' 
+    
+        - name: Install Pylint
+          run: pip install pylint
+        
+        - name: Run Pylint
+          run: pylint ./back-end ./front-end
+
+
+  tests:
+      name: Run Tests
+      runs-on: ubuntu-latest
+      steps:
+          - name: Checkout code
+            uses: actions/checkout@v5
+          
+          - name: Set up Python
+            uses: actions/setup-python@v5
+            with:
+              python-version: '3.11' 
+
+          - name: Install backend test dependencies
+            run: pip install -r requirements_test.txt -r requirements.txt
+            working-directory: ./back-end
+
+          - name: Install frontend test dependencies
+            run: pip install -r requirements_test.txt -r requirements.txt  
+            working-directory: ./front-end
+          
+          - name: Run backend tests
+            env:
+              POSTGRES_DB: "testDB"
+              POSTGRES_USER: "testUSER"
+              POSTGRES_PASSWORD: "testPASSWD"
+              POSTGRES_HOST: "testHOST"
+              PORT: "1111"
+              JWT_KEY: "testKEY"
+              APP_PORT: "2222"
+            run: pytest
+            working-directory: ./back-end
+           
+          - name: Run frontend tests
+            env:
+              BACKEND_HOSTNAME: "testHOST"
+              BACKEND_PORT: "1111"
+              SECRET_KEY: "testKEY"
+              SERVER_PORT: "2222"
+            run: pytest 
+            working-directory: ./front-end
