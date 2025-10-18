@@ -46,7 +46,7 @@ jobs:
 
 
   tests:
-      name: Run Custom Tests
+      name: Run Tests
       runs-on: ubuntu-latest
       steps:
           - name: Checkout code
@@ -62,15 +62,11 @@ jobs:
         
           - name: Install frontend test dependencies
             run: pip install -r ./front-end/requirements_test.txt
-
-          - name: Install backend dependencies
-            run: pip install -r ./back-end/requirements.txt
-        
-          - name: Install frontend dependencies
-            run: pip install -r ./front-end/requirements.txt  
           
           - name: Run backend tests
-            run: python ./back-end/test_app.py
+            run: pytest
+            working-directory: ./back-end
            
           - name: Run frontend tests
-            run: python ./front-end/test_app.py
+            run: pytest 
+            working-directory: ./front-end
