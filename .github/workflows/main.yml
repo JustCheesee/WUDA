@@ -1,0 +1,26 @@
+name: CI/CD Pipeline
+
+on: 
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  source-code-scan:
+      name: Code Vulnerability Scan
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v5
+        
+        - name: Set up Python
+          uses: actions/setup-python@v5
+          with:
+            python-version: '3.11'
+
+        - name: Install Bandit
+          run: pip install bandit
+
+        # -r  : recursive
+        # -ll : report only medium-level issues or higher
+        - name: Run Bandit
+          run: bandit -r -ll ./back-end ./front-end
