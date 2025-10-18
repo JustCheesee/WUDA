@@ -120,7 +120,7 @@ jobs:
         with:
           context: ./back-end
           push: true
-          tags: ghcr.io/wuda/backend:latest
+          tags: ghcr.io/justcheesee/wuda/backend:latest
 
   docker-image-frontend:
       name: Build Docker Frontend Image
@@ -145,5 +145,5 @@ jobs:
           with:
             context: ./front-end
             push: true
-            tags: ghcr.io/wuda/frontend:latest      
+            tags: ghcr.io/justcheesee/wuda/frontend:latest      
      
