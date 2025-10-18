@@ -44,44 +44,106 @@ jobs:
         - name: Run Pylint
           run: pylint ./back-end ./front-end
 
+  backend-tests:
+    name: Run Backend Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-  tests:
-      name: Run Tests
+      - name: Install backend dependencies
+        run: pip install -r requirements_test.txt -r requirements.txt
+        working-directory: ./back-end
+        
+      - name: Run backend tests
+        env:
+          POSTGRES_DB: "testDB"
+          POSTGRES_USER: "testUSER"
+          POSTGRES_PASSWORD: "testPASSWD"
+          POSTGRES_HOST: "testHOST"
+          PORT: "1111"
+          JWT_KEY: "testKEY"
+          APP_PORT: "2222"
+        run: pytest
+        working-directory: ./back-end
+
+  frontend-tests:
+    name: Run Frontend Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+        
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          
+      - name: Install frontend dependencies
+        run: pip install -r requirements_test.txt -r requirements.txt
+        working-directory: ./front-end
+        
+      - name: Run frontend tests
+        env:
+          BACKEND_HOSTNAME: "testHOST"
+          BACKEND_PORT: "1111"
+          SECRET_KEY: "testKEY"
+          SERVER_PORT: "2222"
+        run: pytest
+        working-directory: ./front-end
+  
+  docker-image-backend:
+      name: Build Docker Backend Image
       runs-on: ubuntu-latest
+      #needs: [source-code-scan, linting, backend-tests]
+      permissions:
+        contents: read
+        packages: write
       steps:
-          - name: Checkout code
-            uses: actions/checkout@v5
-          
-          - name: Set up Python
-            uses: actions/setup-python@v5
-            with:
-              python-version: '3.11' 
+      - name: Checkout code
+        uses: actions/checkout@v5
 
-          - name: Install backend test dependencies
-            run: pip install -r requirements_test.txt -r requirements.txt
-            working-directory: ./back-end
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-          - name: Install frontend test dependencies
-            run: pip install -r requirements_test.txt -r requirements.txt  
-            working-directory: ./front-end
-          
-          - name: Run backend tests
-            env:
-              POSTGRES_DB: "testDB"
-              POSTGRES_USER: "testUSER"
-              POSTGRES_PASSWORD: "testPASSWD"
-              POSTGRES_HOST: "testHOST"
-              PORT: "1111"
-              JWT_KEY: "testKEY"
-              APP_PORT: "2222"
-            run: pytest
-            working-directory: ./back-end
-           
-          - name: Run frontend tests
-            env:
-              BACKEND_HOSTNAME: "testHOST"
-              BACKEND_PORT: "1111"
-              SECRET_KEY: "testKEY"
-              SERVER_PORT: "2222"
-            run: pytest 
-            working-directory: ./front-end
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./back-end
+          push: true
+          tags: ghcr.io/${{ github.repository }}/backend:latest
+
+  docker-image-frontend:
+      name: Build Docker Frontend Image
+      runs-on: ubuntu-latest
+      #needs: [source-code-scan, linting, backend-tests]
+      permissions:
+        contents: read
+        packages: write
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v5
+  
+        - name: Log in to GitHub Container Registry
+          uses: docker/login-action@v3
+          with:
+            registry: ghcr.io
+            username: ${{ github.actor }}
+            password: ${{ secrets.GITHUB_TOKEN }}
+  
+        - name: Build and push frontend image
+          uses: docker/build-push-action@v5
+          with:
+            context: ./front-end
+            push: true
+            tags: ghcr.io/${{ github.repository }}/frontend:latest      
+     
