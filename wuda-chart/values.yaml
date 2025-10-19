@@ -1,0 +1,26 @@
+# Ustawienia Back-endu
+backend:
+  replicaCount: 1
+  image: "ghcr.io/justcheesee/wuda/backend:latest"
+  port: 5000
+
+# Ustawienia Front-endu
+frontend:
+  replicaCount: 1
+  image: "ghcr.io/justcheesee/wuda/frontend:latest"
+  port: 8000
+  serviceType: LoadBalancer
+
+# Ustawienia Bazy Danych
+database:
+  image: "postgres:15"
+  port: 5432
+  storageSize: 2Gi
+
+# Dane poufne aplikacji
+secrets:
+  postgresPassword: ""
+  postgresDb: "games"
+  postgresUser: "board_games"
+  jwtKey: ""
+  frontendKey: ""

@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wuda-backend
+spec:
+  replicas: {{ .Values.backend.replicaCount }}
+  selector:
+    matchLabels:
+      app: wuda-backend
+  template:
+    metadata:
+      labels:
+        app: wuda-backend
+    spec:
+      containers:
+        - name: backend
+          image: {{ .Values.backend.image }}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: {{ .Values.backend.port }}
+          envFrom:
+            - secretRef:
+                name: wuda-secrets
+          env:
+            - name: POSTGRES_HOST
+              value: "wuda-database"
+            - name: PORT
+              value: {{ .Values.database.port | quote }}
+            - name: APP_PORT
+              value: {{ .Values.backend.port | quote }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wuda-backend
+spec:
+  type: ClusterIP
+  selector:
+    app: wuda-backend
+  ports:
+    - port: {{ .Values.backend.port }}
+      targetPort: {{ .Values.backend.port }}

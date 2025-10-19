@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wuda-frontend
+spec:
+  replicas: {{ .Values.frontend.replicaCount }}
+  selector:
+    matchLabels:
+      app: wuda-frontend
+  template:
+    metadata:
+      labels:
+        app: wuda-frontend
+    spec:
+      containers:
+        - name: frontend
+          image: {{ .Values.frontend.image }}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: {{ .Values.frontend.port }}
+          envFrom:
+            - secretRef:
+                name: wuda-secrets
+          env:
+            - name: BACKEND_HOSTNAME
+              value: "wuda-backend"
+            - name: BACKEND_PORT
+              value: {{ .Values.backend.port | quote }}
+            - name: SERVER_PORT
+              value: {{ .Values.frontend.port | quote }}
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: wuda-frontend
+spec:
+  type: {{ .Values.frontend.serviceType }}
+  selector:
+    app: wuda-frontend
+  ports:
+    - port: 80
+      targetPort: {{ .Values.frontend.port }}
